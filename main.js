@@ -224,25 +224,28 @@
 
   /* ---------- selected work ---------- */
   const WORK = [
-    { n: 'Multi-chain payments', st: 'in testing', tag: 'Case 01 · Fintech infrastructure', sum: 'A multi-merchant crypto payment gateway: one checkout, four networks.',
+    { n: 'Multi-chain payments', st: 'in testing', tag: 'Fintech infrastructure', sum: 'A multi-merchant crypto payment gateway: one checkout, four networks.',
       pts: ['ETH, Base, TRON and Solana behind a single API', 'Per-payment HD wallet derivation, automatic and manual sweeps with gas top-up', 'Merchant portal, webhooks and an internal ledger with withdrawal requests'],
       m: [['Networks', '4'], ['Stage', 'Testnet'], ['Model', 'Multi-merchant']] },
-    { n: 'Mail infrastructure', st: 'running', tag: 'Case 02 · Self-hosted mail', sum: 'Business mail for several domains on servers I run, with the deliverability side handled.',
+    { n: 'Mail infrastructure', st: 'running', tag: 'Self-hosted mail', sum: 'Business mail for several domains on servers I run, with the deliverability side handled.',
       pts: ['Postfix and Dovecot serving multiple domains from one host', 'One SAN certificate replaced a tangle of mismatched certificates', 'SPF, DKIM (2048-bit) and DMARC, plus an outbound relay and webmail'],
       m: [['Domains', '3+'], ['Protocols', 'IMAP · SMTP'], ['DKIM', '2048-bit']] },
-    { n: '3D storytelling site', st: 'live', tag: 'Case 03 · Interactive web', sum: 'A studio site that behaves like an operating system: boot sequence, a 3D hardware deck and a showroom.',
+    { n: 'AI tool launch page', st: 'built', tag: 'Launch page for a developer tool', sum: 'A launch page for an AI-agent developer tool, built around a 3D robot you can look at instead of a stock illustration.',
+      pts: ['A Blender-made robot loaded as glTF, lit with an HDR environment and finished with a bloom pass', 'Animated backgrounds and scroll-driven reveals with GSAP, on smooth scrolling', 'A lighter path for phones: lower pixel ratio, bloom switched off, and a geometric stand-in if the model fails to load'],
+      m: [['3D', 'glTF + HDR'], ['Motion', 'GSAP'], ['Mobile', 'Tuned']] },
+    { n: '3D storytelling site', st: 'live', tag: 'Interactive web', sum: 'A studio site that behaves like an operating system: boot sequence, a 3D hardware deck and a showroom.',
       pts: ['A Stream Deck-style 3D hero that drives the whole interface', 'A showroom desktop with lazy-loaded video reels', 'Accent theming that recolors the UI, the glow and the video together'],
       m: [['Views', '3'], ['Scroll', 'None'], ['Mobile', 'Tuned']] },
-    { n: 'sametkoch.com', st: 'live', tag: 'Case 04 · Photographer portfolio', sum: 'A portfolio gallery whose content the owner controls in real time.',
+    { n: 'sametkoch.com', st: 'live', tag: 'Photographer portfolio', sum: 'A portfolio gallery whose content the owner controls in real time.',
       pts: ['A React front end with hand-written CSS', 'A PHP API and admin panel behind it', 'A CDN with an image-resizing API tuned to each screen'],
       m: [['Front end', 'React'], ['API', 'PHP'], ['Images', 'Resized']], link: ['https://sametkoch.com', 'Visit sametkoch.com'] },
-    { n: 'Industrial brand site', st: 'live', tag: 'Case 05 · Brand site, Latin America', sum: 'A Spanish-language site for a metal cutting and fabrication shop, in strict black and silver.',
+    { n: 'Industrial brand site', st: 'live', tag: 'Brand site, Latin America', sum: 'A Spanish-language site for a metal cutting and fabrication shop, in strict black and silver.',
       pts: ['An editorial layout with an interactive capabilities index that changes image and specs on hover', 'Staggered scroll reveals, a parallax banner, magnetic buttons and a count-up, all switched off for reduced motion', 'Self-hosted fonts, real shop photography and a blueprint-style detail layer'],
       m: [['Language', 'Spanish'], ['Palette', 'Black + silver'], ['Stack', 'HTML · CSS · JS']] },
-    { n: 'Local service landing', st: 'live', tag: 'Case 06 · Google Ads and local SEO', sum: 'A one-page, mobile-first landing for a local taxi service in Türkiye, built to convert ad clicks into calls.',
+    { n: 'Local service landing', st: 'live', tag: 'Google Ads and local SEO', sum: 'A one-page, mobile-first landing for a local taxi service in Türkiye, built to convert ad clicks into calls.',
       pts: ['A sticky call and WhatsApp bar, plus a WhatsApp order form that pre-fills the message', 'TaxiService, LocalBusiness and FAQPage structured data, sitemap and critical CSS inlined for speed', 'GA4 click events on every call and WhatsApp link, and a font fix so Turkish capitals render correctly'],
       m: [['Layout', 'Mobile-first'], ['Schema', '3 types'], ['Tracking', 'GA4 events']] },
-    { n: 'Token launch sites', st: 'live', tag: 'Case 07 · Illustrated landing pages', sum: 'Playful, hand-drawn style landing pages for community tokens, built fast and kept light.',
+    { n: 'Token launch sites', st: 'live', tag: 'Illustrated landing pages', sum: 'Playful, hand-drawn style landing pages for community tokens, built fast and kept light.',
       pts: ['A single long scroll with cartoon art, a copy-to-clipboard contract address and deep links to the exchange', 'An asset pipeline that turns generated illustrations into optimized, transparent web images', 'Careful legal copy so the page never implies an affiliation it does not have'],
       m: [['Format', 'One scroll'], ['Art', 'Illustrated'], ['Build', 'No framework']] },
   ];
@@ -259,7 +262,7 @@
     cur = (i + WORK.length) % WORK.length;
     const w = WORK[cur];
     $$('.tab', rail).forEach((el, j) => { el.classList.toggle('on', j === cur); el.setAttribute('aria-selected', j === cur); });
-    detail.innerHTML = `<div class="fade"><div class="tag">${esc(w.tag)}</div><h3>${esc(w.n)}</h3><p class="sum">${esc(w.sum)}</p>
+    detail.innerHTML = `<div class="fade"><div class="tag">Case 0${cur + 1} · ${esc(w.tag)}</div><h3>${esc(w.n)}</h3><p class="sum">${esc(w.sum)}</p>
       <ul class="pts">${w.pts.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
       <div class="metrics">${w.m.map((x) => `<div><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join('')}</div>
       ${w.link ? `<p class="visit"><a class="btn btn-sm" href="${esc(w.link[0])}" rel="noopener">${esc(w.link[1])} ↗</a></p>` : ''}</div>`;
