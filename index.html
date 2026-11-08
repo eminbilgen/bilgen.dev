@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emin Bilgen — Web &amp; Infrastructure</title>
+<meta name="description" content="Emin Bilgen builds premium websites, payment systems and AI tooling, and hosts them end to end. Independent, based in Ankara.">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="canonical" href="https://bilgen.dev/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bilgen.dev/">
+<meta property="og:title" content="Emin Bilgen — Web &amp; Infrastructure">
+<meta property="og:description" content="Premium websites, payment systems and AI tooling, built and hosted end to end.">
+<meta property="og:image" content="https://bilgen.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Emin Bilgen — Web &amp; Infrastructure">
+<meta name="twitter:description" content="Premium websites, payment systems and AI tooling, built and hosted end to end.">
+<meta name="twitter:image" content="https://bilgen.dev/og-image.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0b'/%3E%3Ctext x='10' y='46' font-family='Arial' font-weight='800' font-size='40' fill='%23ecebe6'%3EE%3C/text%3E%3Ccircle cx='48' cy='44' r='6' fill='%23ff5b2e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Emin Bilgen","url":"https://bilgen.dev","image":"https://bilgen.dev/assets/emin.jpg","jobTitle":"Founder, Web & Infrastructure","email":"mailto:emin@bilgen.dev","address":{"@type":"PostalAddress","addressLocality":"Ankara","addressCountry":"TR"},"sameAs":["https://github.com/eminbilgen","https://www.linkedin.com/in/emin-bilgen/","https://x.com/eminbilgen00"]}
+</script>
+</head>
+<body>
+<a class="skip" href="#work">Skip to content</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="logo" href="#top" aria-label="Emin Bilgen, back to top">EB<i>.</i></a>
+  <nav aria-label="Primary">
+    <a href="#work">Work</a>
+    <a href="#live">Live</a>
+    <a href="#open-source">Open source</a>
+    <a href="#about">About</a>
+    <a href="#process">Process</a>
+  </nav>
+  <a class="btn btn-sm" href="mailto:emin@bilgen.dev">Say hello</a>
+</header>
+
+<!-- 3D hero: scroll assembles the tower, one stage per capability -->
+<section class="build" id="top">
+  <div class="sticky"><canvas id="gl" aria-hidden="true"></canvas></div>
+  <div class="stages">
+    <article class="stage left on" data-s="0">
+      <div class="copy">
+        <p class="eyebrow">Founder · Web &amp; Infrastructure</p>
+        <h1>I build<br>the whole<br>thing<span>.</span></h1>
+        <p class="lede">Premium websites, payment systems and AI tooling, designed, built and hosted end to end.</p>
+        <p class="hint"><span></span>Scroll</p>
+      </div>
+    </article>
+    <article class="stage left" data-s="1">
+      <div class="copy">
+        <p class="eyebrow">01 · Design</p>
+        <h2>Interfaces with a point of view.</h2>
+        <p>Interactive, motion-led sites that feel like products, not templates. Boot sequences, 3D decks, studio showrooms.</p>
+        <ul class="chips"><li>React</li><li>Vanilla JS</li><li>WebGL</li><li>CSS</li></ul>
+      </div>
+    </article>
+    <article class="stage right" data-s="2">
+      <div class="copy">
+        <p class="eyebrow">02 · Build</p>
+        <h2>APIs and admin panels that hold up.</h2>
+        <p>PHP and Python back ends, content you can control in real time, image pipelines and CDNs tuned for speed.</p>
+        <ul class="chips"><li>PHP</li><li>Python</li><li>REST</li><li>Node.js</li></ul>
+      </div>
+    </article>
+    <article class="stage left" data-s="3">
+      <div class="copy">
+        <p class="eyebrow">03 · Host</p>
+        <h2>Infrastructure I run myself.</h2>
+        <p>Servers, mail, DNS and TLS, kept by the same person who wrote the code. The status page and mail checker further down run on it.</p>
+        <ul class="chips"><li>Nginx</li><li>Postfix</li><li>Cloudflare</li><li>TLS</li></ul>
+      </div>
+    </article>
+    <article class="stage right" data-s="4">
+      <div class="copy">
+        <p class="eyebrow">04 · Pay</p>
+        <h2>Money moves through it.</h2>
+        <p>A multi-chain checkout with merchant ledgers and sweeps: ETH, Base, TRON and Solana behind one API.</p>
+        <ul class="chips"><li>Payments</li><li>Webhooks</li><li>Ledgers</li></ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<main>
+  <!-- Selected work: operator-panel tabs -->
+  <section class="sec" id="work">
+    <div class="wrap">
+      <p class="eyebrow reveal">Selected work</p>
+      <h2 class="big reveal">Four builds, told without the client names.</h2>
+      <div class="panel reveal" id="workPanel">
+        <div class="rail" role="tablist" aria-label="Selected work"></div>
+        <div class="detail" id="workDetail" role="tabpanel" aria-live="polite"></div>
+      </div>
+      <p class="fine reveal">Some of my best work belongs to people who prefer to stay anonymous, so these are described by what they do, not by who they are for.</p>
+    </div>
+  </section>
+
+  <!-- Live: real data, real engine -->
+  <section class="sec alt" id="live">
+    <div class="wrap">
+      <p class="eyebrow reveal">Live</p>
+      <h2 class="big reveal">Not screenshots. These are running right now.</h2>
+      <div class="live-grid">
+        <div class="card reveal" id="statusCard">
+          <div class="card-head"><h3>Status</h3><a href="https://status.bilgen.dev" rel="noopener">status.bilgen.dev ↗</a></div>
+          <div class="status-hero"><span class="dot" id="statusDot"></span><b id="statusText">Reading status…</b></div>
+          <div id="statusRows" class="rows"></div>
+          <p class="fine" id="statusMeta">Live data from the self-hosted monitor.</p>
+        </div>
+        <div class="card reveal" id="mailCard">
+          <div class="card-head"><h3>Email check</h3><a href="https://mailcheck.bilgen.dev" rel="noopener">mailcheck.bilgen.dev ↗</a></div>
+          <p class="card-sub">Type a domain. SPF, DKIM, DMARC, MX and MTA-STS are checked right here, in your browser.</p>
+          <form class="mc-form" id="mcForm" autocomplete="off">
+            <label class="sr" for="mcInput">Domain</label>
+            <input id="mcInput" placeholder="yourcompany.com" inputmode="url" spellcheck="false" autocapitalize="off">
+            <button class="btn" type="submit" id="mcGo">Check</button>
+          </form>
+          <p class="try">Try <a href="#" data-d="google.com">google.com</a> <a href="#" data-d="github.com">github.com</a> <a href="#" data-d="bilgen.dev">bilgen.dev</a></p>
+          <div id="mcOut" class="mc-out" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open source: live from GitHub -->
+  <section class="sec" id="open-source">
+    <div class="wrap">
+      <p class="eyebrow reveal">Open source</p>
+      <h2 class="big reveal">Tools I wrote because I needed them.</h2>
+      <div class="repos" id="repos"></div>
+      <p class="fine reveal"><a href="https://github.com/eminbilgen" rel="noopener">github.com/eminbilgen ↗</a></p>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="sec alt" id="about">
+    <div class="wrap about">
+      <figure class="photo reveal">
+        <img src="assets/emin.jpg" alt="Portrait of Emin Bilgen" width="460" height="460" loading="lazy">
+      </figure>
+      <div class="about-copy">
+        <p class="eyebrow reveal">About</p>
+        <h2 class="big reveal">One person, from first sketch to server.</h2>
+        <p class="reveal">I'm Emin, an independent web engineer based in Ankara. Since 2019 I've been building websites and the infrastructure underneath them, and I've worked for myself since 2021.</p>
+        <p class="reveal">I work alone on purpose. You talk to the person who designs it, writes it and keeps it running, so nothing gets lost between a designer, a developer and a sysadmin.</p>
+        <ul class="facts reveal">
+          <li><b>Front end</b> React, vanilla JS, WebGL, CSS</li>
+          <li><b>Back end</b> PHP, Python, Node.js, REST</li>
+          <li><b>Infrastructure</b> Nginx, mail, DNS, TLS, Cloudflare</li>
+          <li><b>Languages</b> English, Turkish</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="sec" id="process">
+    <div class="wrap">
+      <p class="eyebrow reveal">Process</p>
+      <h2 class="big reveal">How a project runs.</h2>
+      <ol class="steps">
+        <li class="reveal"><span>01</span><h3>Brief</h3><p>You tell me what you are building and who it is for. A short message is enough to start.</p></li>
+        <li class="reveal"><span>02</span><h3>Plan</h3><p>I reply with an approach, a price and a date, so you can decide before anything is built.</p></li>
+        <li class="reveal"><span>03</span><h3>Build</h3><p>You see a working version early on a private link and keep seeing it as it grows.</p></li>
+        <li class="reveal"><span>04</span><h3>Launch &amp; run</h3><p>I put it live and can keep hosting and maintaining it, or hand everything over cleanly.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec alt" id="faq">
+    <div class="wrap narrow">
+      <p class="eyebrow reveal">Questions</p>
+      <h2 class="big reveal">Before you write.</h2>
+      <div class="faq reveal">
+        <details><summary>What kind of projects do you take?</summary><p>Marketing and portfolio sites with real interaction, web apps with a back end and admin panel, payment and checkout flows, and the hosting, mail and DNS around them.</p></details>
+        <details><summary>Can you host it for me?</summary><p>Yes. I run my own servers, so I can host, monitor and maintain what I build, or deliver it so you can host it anywhere.</p></details>
+        <details><summary>Will my work stay private?</summary><p>By default, yes. I don't list clients or show unreleased work without permission.</p></details>
+        <details><summary>How do we start?</summary><p>Send a short email about what you want to build. I will answer with a plan, a price and a date.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="sec contact" id="contact">
+    <div class="wrap">
+      <p class="eyebrow reveal">Contact</p>
+      <h2 class="huge reveal">Have something<br>to ship<span>?</span></h2>
+      <p class="reveal lede">Tell me what you are building and I will reply with a plan, a price and a date.</p>
+      <a class="btn btn-lg reveal" href="mailto:emin@bilgen.dev">emin@bilgen.dev</a>
+      <ul class="links reveal">
+        <li><a href="https://github.com/eminbilgen" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/emin-bilgen/" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/eminbilgen00" rel="noopener">X</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap"><span>© 2026 Emin Bilgen · Ankara</span><span>Hosted on a server I run · <a href="https://status.bilgen.dev" rel="noopener">status</a></span></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script src="main.js" defer></script>
+</body>
+</html>
