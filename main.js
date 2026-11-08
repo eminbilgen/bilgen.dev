@@ -4,9 +4,10 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = matchMedia('(pointer: fine)').matches;
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
-  /* ---------- nav, progress, reveal ---------- */
+  /* ---------- nav, progress, active link ---------- */
   const nav = $('#nav'), bar = $('#progress');
   function onScroll() {
     nav.classList.toggle('solid', scrollY > 40);
@@ -16,14 +17,69 @@
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  const navLinks = $$('.nav nav a');
+  const secObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      navLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  $$('main section[id]').forEach((s) => secObs.observe(s));
+
+  /* ---------- reveal + word-by-word headings ---------- */
+  function splitWords(el) {
+    let n = 0;
+    [...el.childNodes].forEach((node) => {
+      if (node.nodeType !== 3) return;
+      const frag = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+        const w = document.createElement('span'); w.className = 'w';
+        const i = document.createElement('span'); i.textContent = part; i.style.transitionDelay = (n++ * 70) + 'ms';
+        w.appendChild(i); frag.appendChild(w);
+      });
+      node.replaceWith(frag);
+    });
+    el.classList.add('split');
+  }
+  $$('.big.reveal, .huge.reveal').forEach((el) => { el.classList.remove('reveal'); splitWords(el); el.classList.add('reveal-split'); });
+
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-  $$('.reveal').forEach((el) => io.observe(el));
+  $$('.reveal, .reveal-split').forEach((el) => io.observe(el));
 
-  /* ---------- 3D tower ---------- */
+  /* ---------- pointer life: spotlight, magnetic buttons ---------- */
+  if (finePointer && !reduce) {
+    const spot = $('#spot');
+    let sx = innerWidth / 2, sy = innerHeight / 2, tx = sx, ty = sy;
+    addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; spot.classList.add('on'); }, { passive: true });
+    (function loop() {
+      sx += (tx - sx) * 0.12; sy += (ty - sy) * 0.12;
+      spot.style.transform = `translate(${sx - 300}px, ${sy - 300}px)`;
+      requestAnimationFrame(loop);
+    })();
+    $$('.btn').forEach((b) => {
+      b.addEventListener('pointermove', (e) => {
+        const r = b.getBoundingClientRect();
+        b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.18}px, ${(e.clientY - r.top - r.height / 2) * 0.28}px)`;
+      });
+      b.addEventListener('pointerleave', () => { b.style.transform = ''; });
+    });
+    document.addEventListener('pointermove', (e) => {
+      const card = e.target.closest && e.target.closest('.repo');
+      $$('.repo').forEach((c) => { if (c !== card) c.style.transform = ''; });
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(900px) rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-4px)`;
+    }, { passive: true });
+  }
+
+  /* ---------- hero: a particle cloud that morphs through the four stages ---------- */
   const build = $('.build'), stages = $$('.stage');
-  let progress = 0; // 0..4, one unit per stage
+  let progress = 0; // 0..4
   function readProgress() {
     const r = build.getBoundingClientRect();
     progress = clamp(-r.top / innerHeight, 0, stages.length - 1);
@@ -41,81 +97,130 @@
     } catch { return false; }
   }
 
-  function startTower() {
+  // deterministic random so the shapes are identical on every load
+  function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+  function makeShapes(N) {
+    const R = rng(7);
+    const gauss = () => (R() + R() + R() - 1.5) * 0.9;
+    const cloud = new Float32Array(N * 3), knot = new Float32Array(N * 3), cube = new Float32Array(N * 3), globe = new Float32Array(N * 3), coin = new Float32Array(N * 3);
+    const cities = Array.from({ length: 16 }, () => { const u = R() * 2 - 1, a = R() * Math.PI * 2, s = Math.sqrt(1 - u * u); return [s * Math.cos(a), u, s * Math.sin(a)]; });
+    for (let i = 0; i < N; i++) {
+      const o = i * 3;
+      // 0: loose swirling cloud
+      { const u = R() * 2 - 1, a = R() * Math.PI * 2, s = Math.sqrt(1 - u * u), r = 3.5 * Math.cbrt(R()) + 0.3; cloud[o] = s * Math.cos(a) * r; cloud[o + 1] = u * r * 0.8; cloud[o + 2] = s * Math.sin(a) * r; }
+      // 1: design, a torus knot ribbon
+      { const t = (i / N) * Math.PI * 2 * 1; const p = 2, q = 3, rr = Math.cos(q * t) + 2; const sc = 0.95;
+        knot[o] = rr * Math.cos(p * t) * sc + gauss() * 0.11; knot[o + 1] = rr * Math.sin(p * t) * sc + gauss() * 0.11; knot[o + 2] = -Math.sin(q * t) * sc * 1.2 + gauss() * 0.11; }
+      // 2: build, a gridded cube (points lie on lattice lines of every face)
+      { const s = 1.7;
+        if (R() < 0.24) { // bright edges of the cube
+          const ax = Math.floor(R() * 3), sa = R() < 0.5 ? s : -s, sb = R() < 0.5 ? s : -s, v = (R() * 2 - 1) * s;
+          const p = [0, 0, 0]; p[ax] = v; p[(ax + 1) % 3] = sa; p[(ax + 2) % 3] = sb; cube[o] = p[0]; cube[o + 1] = p[1]; cube[o + 2] = p[2];
+        } else {
+          const f = Math.floor(R() * 6), a = (R() * 2 - 1) * s, b = (R() * 2 - 1) * s, step = 3.4 / 8; const snap = (v) => Math.round((v + s) / step) * step - s;
+          const useA = R() < 0.5; const A = useA ? snap(a) : a, B = useA ? b : snap(b);
+          const faces = [[s, A, B], [-s, A, B], [A, s, B], [A, -s, B], [A, B, s], [A, B, -s]]; cube[o] = faces[f][0]; cube[o + 1] = faces[f][1]; cube[o + 2] = faces[f][2];
+        } }
+      // 3: host, a globe drawn with latitude and longitude lines, plus bright city nodes
+      { if (R() < 0.12) { const c = cities[Math.floor(R() * cities.length)]; globe[o] = c[0] * 2.05 + gauss() * 0.07; globe[o + 1] = c[1] * 2.05 + gauss() * 0.07; globe[o + 2] = c[2] * 2.05 + gauss() * 0.07; }
+        else { let lat = Math.asin(R() * 2 - 1), lon = R() * Math.PI * 2; if (R() < 0.5) lat = Math.round(lat / (Math.PI / 12)) * (Math.PI / 12); else lon = Math.round(lon / (Math.PI / 12)) * (Math.PI / 12);
+          globe[o] = Math.cos(lat) * Math.cos(lon) * 2; globe[o + 1] = Math.sin(lat) * 2; globe[o + 2] = Math.cos(lat) * Math.sin(lon) * 2; } }
+      // 4: pay, a coin with engraved rings
+      { const k = R(); let r, z; if (k < 0.18) { r = 2; z = (R() * 2 - 1) * 0.22; } else { r = Math.round(R() * 8) * 0.24 + 0.1 + (R() - 0.5) * 0.03; z = R() < 0.5 ? 0.22 : -0.22; }
+        const a = R() * Math.PI * 2; coin[o] = Math.cos(a) * r; coin[o + 1] = Math.sin(a) * r; coin[o + 2] = z; }
+    }
+    return [cloud, knot, cube, globe, coin];
+  }
+
+  function startHero() {
     if (!window.THREE || !webglOk()) { document.body.classList.add('nogl'); return; }
     const canvas = $('#gl');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    const mobile = innerWidth < 900;
+    const N = mobile ? 5200 : 10000;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
+    const px = Math.min(devicePixelRatio, 2);
+    renderer.setPixelRatio(px);
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x0a0a0b, 9, 24);
-    const cam = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(4, 7, 5); scene.add(key);
-    const rim = new THREE.PointLight(0xff5b2e, 1.1, 12); rim.position.set(-3, 1, -2); scene.add(rim);
-    const grid = new THREE.GridHelper(44, 66, 0x2a2a2e, 0x1a1a1d); grid.position.y = -1.6; scene.add(grid);
+    const cam = new THREE.PerspectiveCamera(40, 1, 0.1, 60);
+    cam.position.set(0, 0, 9);
 
-    const N = 4, H = 0.62, GAP = 0.18, slabs = [];
-    for (let i = 0; i < N; i++) {
-      const w = 3.4 - i * 0.18, d = 2.2 - i * 0.1;
-      const geo = new THREE.BoxGeometry(w, H, d);
-      const mat = new THREE.MeshStandardMaterial({ color: 0x151517, metalness: 0.55, roughness: 0.38, emissive: 0xff5b2e, emissiveIntensity: 0, transparent: true, opacity: 1 });
-      const mesh = new THREE.Mesh(geo, mat);
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0xff5b2e, transparent: true, opacity: 0 }));
-      mesh.add(edges);
-      mesh.userData = { edges, y: -1.6 + H / 2 + 0.02 + i * (H + GAP) };
-      const lines = new THREE.Group();
-      for (let k = 0; k < 5; k++) {
-        const b = new THREE.Mesh(new THREE.BoxGeometry(w * 0.7 * (1 - k * 0.04), 0.012, 0.01), new THREE.MeshBasicMaterial({ color: 0x3a3a40 }));
-        b.position.set(0, -H / 2 + 0.1 + k * 0.1, d / 2 + 0.006);
-        lines.add(b);
-      }
-      mesh.add(lines);
-      scene.add(mesh);
-      slabs.push(mesh);
-    }
+    const shapes = makeShapes(N);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(shapes[0], 3));
+    shapes.forEach((s, i) => geo.setAttribute('s' + i, new THREE.BufferAttribute(s, 3)));
+    const R = rng(99), rand = new Float32Array(N * 4);
+    for (let i = 0; i < N * 4; i++) rand[i] = R();
+    geo.setAttribute('aR', new THREE.BufferAttribute(rand, 4));
+
+    const mat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      uniforms: { uT: { value: 0 }, uTime: { value: 0 }, uPx: { value: px }, uMix: { value: 0.3 }, uScale: { value: 1 } },
+      vertexShader: `
+        attribute vec3 s0; attribute vec3 s1; attribute vec3 s2; attribute vec3 s3; attribute vec3 s4; attribute vec4 aR;
+        uniform float uT; uniform float uTime; uniform float uPx; uniform float uMix; uniform float uScale;
+        varying vec3 vC; varying float vA;
+        vec3 pick(float i){ if(i<0.5) return s0; if(i<1.5) return s1; if(i<2.5) return s2; if(i<3.5) return s3; return s4; }
+        void main(){
+          float k = min(floor(uT), 3.0); float f = uT >= 4.0 ? 1.0 : uT - floor(uT);
+          float st = clamp(f * 1.7 - aR.x * 0.7, 0.0, 1.0); st = st * st * (3.0 - 2.0 * st);
+          vec3 p = mix(pick(k), pick(k + 1.0), st);
+          float w = uTime * 0.8;
+          p += vec3(sin(w + aR.y * 6.2831), cos(w * 0.9 + aR.z * 6.2831), sin(w * 0.7 + aR.w * 6.2831)) * 0.045;
+          float burst = sin(st * 3.14159) * 0.9; p += normalize(p + 0.0001) * burst * (0.3 + aR.x);
+          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          gl_Position = projectionMatrix * mv;
+          float size = 0.9 + aR.w * 1.5 + step(0.985, aR.y) * 2.2;
+          gl_PointSize = size * uPx * uScale * (14.0 / -mv.z);
+          float o = smoothstep(0.0, 1.0, aR.z + uMix - 0.3);
+          vC = mix(vec3(0.95, 0.94, 0.9), vec3(1.0, 0.38, 0.2), o);
+          vA = 0.42 + aR.w * 0.5;
+        }`,
+      fragmentShader: `
+        varying vec3 vC; varying float vA;
+        void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.05, d) * vA; if(a < 0.01) discard; gl_FragColor = vec4(vC, a); }`,
+    });
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
 
     function resize() {
       const w = canvas.clientWidth, h = canvas.clientHeight;
       renderer.setSize(w, h, false);
       cam.aspect = w / h;
       cam.updateProjectionMatrix();
+      mat.uniforms.uScale.value = clamp(h / 800, 0.6, 1.6);
     }
     addEventListener('resize', resize);
     resize();
 
-    const ease = (x) => 1 - Math.pow(1 - x, 3);
-    let t = progress, side = 0, time = 0, visible = true;
+    const mixPerStage = [0.25, 0.75, 0.45, 0.4, 0.8];
+    let mx = 0, my = 0, tmx = 0, tmy = 0, t = progress, side = 0, time = 0, visible = true;
+    if (finePointer) addEventListener('pointermove', (e) => { tmx = e.clientX / innerWidth - 0.5; tmy = e.clientY / innerHeight - 0.5; }, { passive: true });
     new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 }).observe(build);
 
     function frame() {
       requestAnimationFrame(frame);
       if (!visible) return;
-      time += 0.016;
-      t += (progress - t) * (reduce ? 1 : 0.07);
-      slabs.forEach((s, i) => {
-        const a = ease(clamp(t - i, 0, 1));
-        s.position.y = s.userData.y + (1 - a) * (0.9 + (N - i) * 0.55);
-        s.rotation.y = (1 - a) * (0.5 + i * 0.25) + Math.sin(time * 0.3 + i) * 0.02;
-        s.material.opacity = 0.28 + 0.72 * a;
-        const active = Math.abs(t - (i + 1)) < 0.5;
-        s.material.emissiveIntensity += ((active ? 0.16 : 0) - s.material.emissiveIntensity) * 0.1;
-        s.userData.edges.material.opacity = (0.35 + 0.65 * a) * (active ? 1 : 0.55);
-      });
-      const mobile = innerWidth < 900;
-      const ang = -0.7 + t * 0.42;
-      const r = mobile ? 11.5 : 8.6;
-      const si = Math.round(t);
-      const sideT = mobile ? 0 : (si === 2 || si === 4 ? 2.1 : -2.1);
+      if (!reduce) time += 0.016;
+      t += (progress - t) * (reduce ? 1 : 0.075);
+      mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
+      mat.uniforms.uT.value = t;
+      mat.uniforms.uTime.value = time;
+      const lo = Math.floor(t), fr = t - lo;
+      mat.uniforms.uMix.value = mixPerStage[Math.min(lo, 4)] * (1 - fr) + mixPerStage[Math.min(lo + 1, 4)] * fr;
+      const isMobile = innerWidth < 900;
+      const sideT = isMobile ? 0 : ([1, 3].includes(Math.round(t)) || Math.round(t) === 0 ? 2.3 : -2.3);
       side += (sideT - side) * 0.06;
-      const m1 = Math.min(t, 1);
-      cam.position.set(Math.sin(ang) * r, 1.2 + m1 * 0.8 + (mobile ? 1.2 : 0), Math.cos(ang) * r);
-      cam.lookAt(side, 0.9 * (1 - m1) - 0.1 + (mobile ? 1.1 : 0), 0);
-      rim.position.x = -3 + Math.sin(time * 0.5) * 1.2;
+      const scale = isMobile ? 0.62 : 1;
+      points.scale.setScalar(scale);
+      points.position.set(side, isMobile ? 1.5 : 0, 0);
+      points.rotation.y = time * 0.18 + t * 0.9 + mx * 0.6;
+      points.rotation.x = -0.25 + t * 0.12 + my * 0.4;
       renderer.render(scene, cam);
     }
     frame();
   }
-  if (document.readyState === 'complete') startTower(); else addEventListener('load', startTower);
+  if (document.readyState === 'complete') startHero(); else addEventListener('load', startHero);
 
   /* ---------- selected work ---------- */
   const WORK = [
@@ -128,9 +233,18 @@
     { n: '3D storytelling site', st: 'live', tag: 'Case 03 · Interactive web', sum: 'A studio site that behaves like an operating system: boot sequence, a 3D hardware deck and a showroom.',
       pts: ['A Stream Deck-style 3D hero that drives the whole interface', 'A showroom desktop with lazy-loaded video reels', 'Accent theming that recolors the UI, the glow and the video together'],
       m: [['Views', '3'], ['Scroll', 'None'], ['Mobile', 'Tuned']] },
-    { n: 'Photographer gallery', st: 'live', tag: 'Case 04 · Full-stack build', sum: 'A portfolio gallery whose content the owner controls in real time.',
+    { n: 'sametkoch.com', st: 'live', tag: 'Case 04 · Photographer portfolio', sum: 'A portfolio gallery whose content the owner controls in real time.',
       pts: ['A React front end with hand-written CSS', 'A PHP API and admin panel behind it', 'A CDN with an image-resizing API tuned to each screen'],
-      m: [['Front end', 'React'], ['API', 'PHP'], ['Images', 'Resized']] },
+      m: [['Front end', 'React'], ['API', 'PHP'], ['Images', 'Resized']], link: ['https://sametkoch.com', 'Visit sametkoch.com'] },
+    { n: 'Industrial brand site', st: 'live', tag: 'Case 05 · Brand site, Latin America', sum: 'A Spanish-language site for a metal cutting and fabrication shop, in strict black and silver.',
+      pts: ['An editorial layout with an interactive capabilities index that changes image and specs on hover', 'Staggered scroll reveals, a parallax banner, magnetic buttons and a count-up, all switched off for reduced motion', 'Self-hosted fonts, real shop photography and a blueprint-style detail layer'],
+      m: [['Language', 'Spanish'], ['Palette', 'Black + silver'], ['Stack', 'HTML · CSS · JS']] },
+    { n: 'Local service landing', st: 'live', tag: 'Case 06 · Google Ads and local SEO', sum: 'A one-page, mobile-first landing for a local taxi service in Türkiye, built to convert ad clicks into calls.',
+      pts: ['A sticky call and WhatsApp bar, plus a WhatsApp order form that pre-fills the message', 'TaxiService, LocalBusiness and FAQPage structured data, sitemap and critical CSS inlined for speed', 'GA4 click events on every call and WhatsApp link, and a font fix so Turkish capitals render correctly'],
+      m: [['Layout', 'Mobile-first'], ['Schema', '3 types'], ['Tracking', 'GA4 events']] },
+    { n: 'Token launch sites', st: 'live', tag: 'Case 07 · Illustrated landing pages', sum: 'Playful, hand-drawn style landing pages for community tokens, built fast and kept light.',
+      pts: ['A single long scroll with cartoon art, a copy-to-clipboard contract address and deep links to the exchange', 'An asset pipeline that turns generated illustrations into optimized, transparent web images', 'Careful legal copy so the page never implies an affiliation it does not have'],
+      m: [['Format', 'One scroll'], ['Art', 'Illustrated'], ['Build', 'No framework']] },
   ];
   const rail = $('.rail', $('#workPanel')), detail = $('#workDetail');
   let cur = 0;
@@ -147,7 +261,8 @@
     $$('.tab', rail).forEach((el, j) => { el.classList.toggle('on', j === cur); el.setAttribute('aria-selected', j === cur); });
     detail.innerHTML = `<div class="fade"><div class="tag">${esc(w.tag)}</div><h3>${esc(w.n)}</h3><p class="sum">${esc(w.sum)}</p>
       <ul class="pts">${w.pts.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
-      <div class="metrics">${w.m.map((x) => `<div><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join('')}</div></div>`;
+      <div class="metrics">${w.m.map((x) => `<div><small>${esc(x[0])}</small><b>${esc(x[1])}</b></div>`).join('')}</div>
+      ${w.link ? `<p class="visit"><a class="btn btn-sm" href="${esc(w.link[0])}" rel="noopener">${esc(w.link[1])} ↗</a></p>` : ''}</div>`;
   }
   show(0);
   $('#workPanel').addEventListener('keydown', (e) => {
@@ -181,8 +296,7 @@
       meta.innerHTML = 'Could not reach the monitor. <a href="https://status.bilgen.dev">Open the status page</a>.';
     }
   }
-  const statusEl = $('#statusCard');
-  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { loadStatus(); o.disconnect(); setInterval(loadStatus, 60000); } }, { rootMargin: '200px' }).observe(statusEl);
+  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { loadStatus(); o.disconnect(); setInterval(loadStatus, 60000); } }, { rootMargin: '200px' }).observe($('#statusCard'));
 
   /* ---------- live mailcheck (the real engine, run in the browser) ---------- */
   const mcOut = $('#mcOut'), mcInput = $('#mcInput'), mcGo = $('#mcGo');
@@ -194,9 +308,13 @@
   function ring(score) {
     const C = 2 * Math.PI * 42;
     const color = score >= 75 ? 'var(--ok)' : score >= 40 ? 'var(--warn)' : 'var(--fail)';
-    return `<div class="ring"><svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="42" fill="none" stroke-width="8"/><circle class="fgc" cx="50" cy="50" r="42" fill="none" stroke-width="8" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-to="${C * (1 - score / 100)}" style="stroke:${color}"/></svg><b>${score}</b></div>`;
+    return `<div class="ring"><svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="42" fill="none" stroke-width="8"/><circle class="fgc" cx="50" cy="50" r="42" fill="none" stroke-width="8" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-to="${C * (1 - score / 100)}" style="stroke:${color}"/></svg><b data-n="${score}">0</b></div>`;
   }
   const LABEL = { pass: 'PASS', warn: 'WARN', fail: 'FAIL', info: 'INFO' };
+  function countUp(el) {
+    const to = +el.dataset.n, t0 = performance.now();
+    (function tick(t) { const p = clamp((t - t0) / 1100, 0, 1); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); })(t0);
+  }
   async function runCheck(domain) {
     mcOut.innerHTML = '<p class="mc-err" style="color:var(--mut)">Asking DNS…</p>';
     mcGo.disabled = true;
@@ -205,15 +323,17 @@
       const rep = await runAll(domain, dohResolver());
       const bad = rep.checks.filter((c) => c.status === 'fail').length;
       mcOut.innerHTML = `<div class="mc-score">${ring(rep.score)}<div><h4>${esc(rep.domain)}: grade ${esc(rep.grade)}</h4><p>${bad ? bad + ' problem' + (bad > 1 ? 's' : '') + ' to fix' : 'No failing checks'}</p></div></div>
-        <div class="mc-list">${rep.checks.map((c) => `<div class="mc-item">${esc(c.title)}<span class="${c.status}">${LABEL[c.status]}</span></div>`).join('')}</div>
+        <div class="mc-list">${rep.checks.map((c, i) => `<div class="mc-item" style="animation-delay:${i * 90}ms">${esc(c.title)}<span class="${c.status}">${LABEL[c.status]}</span></div>`).join('')}</div>
         <p class="mc-more"><a href="https://mailcheck.bilgen.dev/?d=${encodeURIComponent(rep.domain)}" rel="noopener">See every finding and the fix →</a></p>`;
-      requestAnimationFrame(() => requestAnimationFrame(() => $$('.fgc', mcOut).forEach((c) => { c.style.strokeDashoffset = c.dataset.to; })));
+      requestAnimationFrame(() => requestAnimationFrame(() => { $$('.fgc', mcOut).forEach((c) => { c.style.strokeDashoffset = c.dataset.to; }); $$('.ring b', mcOut).forEach(countUp); }));
     } catch (err) {
       mcOut.innerHTML = `<p class="mc-err">${esc(err.message || 'The check could not run.')} <a href="https://mailcheck.bilgen.dev/?d=${encodeURIComponent(domain)}" style="color:var(--ac)">Open the full tool →</a></p>`;
     } finally { mcGo.disabled = false; }
   }
   $('#mcForm').addEventListener('submit', (e) => { e.preventDefault(); if (mcInput.value.trim()) runCheck(mcInput.value.trim()); });
   $$('.try a').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); mcInput.value = a.dataset.d; runCheck(a.dataset.d); }));
+  // run once on its own when the card scrolls into view, so the page shows something alive
+  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { o.disconnect(); if (!mcInput.value) { mcInput.value = 'google.com'; runCheck('google.com'); } } }, { threshold: 0.35 }).observe($('#mailCard'));
 
   /* ---------- open source, live from GitHub ---------- */
   const FALLBACK = [
