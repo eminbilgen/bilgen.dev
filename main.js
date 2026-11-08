@@ -220,7 +220,14 @@
     }
     frame();
   }
-  if (document.readyState === 'complete') startHero(); else addEventListener('load', startHero);
+  function loadThree() {
+    const t = document.createElement('script');
+    t.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    t.onload = startHero;
+    t.onerror = () => document.body.classList.add('nogl');
+    document.head.appendChild(t);
+  }
+  if (document.readyState === 'complete') loadThree(); else addEventListener('load', loadThree);
 
   /* ---------- selected work ---------- */
   const WORK = [
