@@ -349,6 +349,8 @@
   const FALLBACK = [
     { name: 'mailcheck', description: 'Email authentication health check: SPF, DKIM, DMARC, MX, MTA-STS, TLS-RPT. CLI for Node and a static in-browser demo. Zero dependencies.', language: 'JavaScript', stargazers_count: 0, html_url: 'https://github.com/eminbilgen/mailcheck', homepage: 'https://mailcheck.bilgen.dev' },
     { name: 'statusboard', description: 'Self-hosted status page: a tiny Node monitor writes JSON, a static page renders uptime, latency, TLS expiry and incidents. Zero dependencies.', language: 'JavaScript', stargazers_count: 0, html_url: 'https://github.com/eminbilgen/statusboard', homepage: 'https://status.bilgen.dev' },
+    { name: 'imgserve', description: 'Resize, crop and convert images on the fly with one PHP file. WebP output, disk cache, ETag and path-traversal protection.', language: 'PHP', stargazers_count: 0, html_url: 'https://github.com/eminbilgen/imgserve', homepage: 'https://img.bilgen.dev' },
+    { name: 'liquid-transitions', description: 'WebGL image transitions in one file: liquid, ripple and dissolve. No dependencies.', language: 'JavaScript', stargazers_count: 0, html_url: 'https://github.com/eminbilgen/liquid-transitions', homepage: 'https://liquid.bilgen.dev' },
   ];
   function renderRepos(list) {
     $('#repos').innerHTML = list.map((r) => `<a class="repo reveal in" href="${esc(r.html_url)}" rel="noopener"><h3>${esc(r.name)}</h3><p>${esc(r.description)}</p>
