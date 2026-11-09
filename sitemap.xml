@@ -7,4 +7,10 @@
     <priority>1.0</priority>
     <image:image><image:loc>https://bilgen.dev/assets/emin.jpg</image:loc><image:title>Emin Bilgen</image:title></image:image>
   </url>
+  <url>
+    <loc>https://bilgen.dev/email-deliverability/</loc>
+    <lastmod>2026-11-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

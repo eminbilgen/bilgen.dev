@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Email Deliverability Fix: SPF, DKIM, DMARC | Emin Bilgen</title>
+<meta name="description" content="Business email landing in spam or bouncing? I audit and fix SPF, DKIM, DMARC, MX, reverse DNS and TLS, then verify with real test mail. Independent, based in Ankara.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="author" content="Emin Bilgen">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="canonical" href="https://bilgen.dev/email-deliverability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Emin Bilgen">
+<meta property="og:url" content="https://bilgen.dev/email-deliverability/">
+<meta property="og:title" content="Email Deliverability Fix: SPF, DKIM, DMARC">
+<meta property="og:description" content="Mail going to spam or bouncing? I find the cause, fix the DNS and mail server settings, and verify with real test mail.">
+<meta property="og:image" content="https://bilgen.dev/og-mail.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts.css?v=1">
+<link rel="stylesheet" href="/style.css?v=2">
+<style>
+.page{padding:120px 0 40px}
+.page h1{font-size:clamp(38px,7vw,76px);line-height:1;letter-spacing:-.045em;margin:12px 0 20px;max-width:18ch}
+.page h1 span{color:var(--ac)}
+.page .lede{max-width:60ch}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ac)}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px}
+.cols2>div{background:var(--bg);padding:24px}
+.cols2 h3{font-size:18px;letter-spacing:-.01em;margin-bottom:8px}
+.cols2 p,.cols2 li{color:var(--tx2);font-size:15px;line-height:1.6}
+.cols2 ul{padding-left:18px;display:grid;gap:4px}
+.cols2 code,.page code{font:13px ui-monospace,Consolas,monospace;background:var(--panel2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+@media(max-width:760px){.cols2{grid-template-columns:1fr}.page{padding-top:96px}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Service","@id":"https://bilgen.dev/email-deliverability/#service","name":"Email deliverability audit and fix","serviceType":"Email authentication and mail server configuration","description":"Audit and repair of SPF, DKIM, DMARC, MX, reverse DNS, TLS and MTA-STS so business email reaches the inbox, verified with real test messages.","provider":{"@id":"https://bilgen.dev/#person"},"areaServed":"Worldwide","url":"https://bilgen.dev/email-deliverability/"},
+{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Emin Bilgen","item":"https://bilgen.dev/"},{"@type":"ListItem","position":2,"name":"Email deliverability fix","item":"https://bilgen.dev/email-deliverability/"}]},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Can you guarantee my email reaches the inbox?","acceptedAnswer":{"@type":"Answer","text":"No one honestly can. Inbox placement also depends on your sending reputation and content. What I can do is remove every technical reason mail gets rejected or flagged, and show you the evidence."}},
+{"@type":"Question","name":"Do you need access to my mailboxes?","acceptedAnswer":{"@type":"Answer","text":"No. The audit uses public DNS records and test messages. I only need DNS access, or I give you the exact records to paste, and server access if the mail server itself needs changes."}},
+{"@type":"Question","name":"Which mail setups do you work with?","acceptedAnswer":{"@type":"Answer","text":"Self-hosted Postfix and Dovecot servers, and domains sending through services such as Google Workspace, Microsoft 365 or a transactional relay."}},
+{"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"It depends on the number of domains and whether the mail server needs changes. Send me your domain and I will reply with a plan, a price and a date."}}
+]}
+]}
+</script>
+</head>
+<body>
+<header class="nav" id="nav">
+  <a class="logo" href="/" aria-label="Emin Bilgen, home">EB<i>.</i></a>
+  <nav aria-label="Primary">
+    <a href="/#services">Services</a>
+    <a href="/#work">Work</a>
+    <a href="/#live">Live</a>
+    <a href="/#about">About</a>
+  </nav>
+  <!--email_off--><a class="btn btn-sm" href="mailto:emin@bilgen.dev?subject=Email%20deliverability">Say hello</a><!--/email_off-->
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <p class="eyebrow">Service · Email deliverability</p>
+    <h1>Your email should land in the inbox<span>.</span></h1>
+    <p class="lede">Customers say they never got your message. Yours go to spam, or bounce. I find the technical cause, fix it at the DNS and mail server level, and prove it with real test mail.</p>
+    <div class="cta-row">
+      <!--email_off--><a class="btn btn-lg" href="mailto:emin@bilgen.dev?subject=Email%20deliverability%20audit">Send me your domain</a><!--/email_off-->
+      <a class="btn btn-lg ghost" href="https://mailcheck.bilgen.dev" rel="noopener">Run the free check first ↗</a>
+    </div>
+  </div>
+
+  <section class="sec">
+    <div class="wrap">
+      <p class="eyebrow">Symptoms</p>
+      <h2 class="big">Sound familiar?</h2>
+      <div class="cols2">
+        <div><h3>Mail lands in spam</h3><p>Messages from your domain arrive in junk at Gmail, Outlook or Yahoo, or only some recipients see them.</p></div>
+        <div><h3>Bounces and rejections</h3><p>Senders get errors like "SPF fail", "DMARC policy" or "relay denied", or your own mail is refused.</p></div>
+        <div><h3>Someone is spoofing you</h3><p>Fake mail goes out in your name because nothing tells receivers to reject it.</p></div>
+        <div><h3>Mail broke after a change</h3><p>A new host, a new mailer or a certificate swap and suddenly some devices, or some recipients, stop working.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec alt">
+    <div class="wrap">
+      <p class="eyebrow">What I check</p>
+      <h2 class="big">The whole chain, not one record.</h2>
+      <div class="cols2">
+        <div><h3>Authentication</h3><ul>
+          <li><b>SPF</b>: correct senders, the 10-lookup limit, one record only</li>
+          <li><b>DKIM</b>: selectors present, key length (2048-bit), signing actually on</li>
+          <li><b>DMARC</b>: policy, alignment and reporting address</li>
+        </ul></div>
+        <div><h3>Server identity</h3><ul>
+          <li><b>MX</b> and the mail host's real behaviour</li>
+          <li><b>Reverse DNS</b> and HELO matching the sending IP</li>
+          <li><b>TLS</b> certificate valid and matching the mail hostname</li>
+        </ul></div>
+        <div><h3>Transport security</h3><ul>
+          <li><b>MTA-STS</b> and <b>TLS-RPT</b> where they make sense</li>
+          <li>Port and protocol setup for IMAP and SMTP clients</li>
+        </ul></div>
+        <div><h3>Reputation</h3><ul>
+          <li>Blocklist status of the sending IP</li>
+          <li>Real test messages to the major providers, with headers read line by line</li>
+        </ul></div>
+      </div>
+      <p class="fine" style="margin-top:18px">The free <a href="https://mailcheck.bilgen.dev" rel="noopener" style="color:var(--ac)">mailcheck</a> tool covers the DNS part in seconds. The paid work is what it cannot do: reading the server, fixing it and proving the result.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="big">Audit, fix, verify.</h2>
+      <ol class="steps">
+        <li><span>01</span><h3>Audit</h3><p>I check your public DNS and send test messages. No access to your mailboxes is needed.</p></li>
+        <li><span>02</span><h3>Findings</h3><p>You get a short written report: what is wrong, why it matters, and the exact record or setting that fixes it.</p></li>
+        <li><span>03</span><h3>Fix</h3><p>I make the changes, or hand you the exact records to paste if you prefer to keep access to yourself.</p></li>
+        <li><span>04</span><h3>Verify</h3><p>I resend test mail and show the passing results, so you see the change instead of taking my word.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec alt">
+    <div class="wrap">
+      <p class="eyebrow">Why me</p>
+      <h2 class="big">I run mail servers myself.</h2>
+      <p class="lede" style="max-width:62ch">I operate Postfix and Dovecot for several domains on my own servers: one SAN certificate in place of mismatched ones, 2048-bit DKIM, SPF and DMARC, and an outbound relay. I wrote the checker above for the same reason. So this is not theory from a checklist, it is the same work I do on my own mail every week.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap narrow">
+      <p class="eyebrow">Questions</p>
+      <h2 class="big">Before you write.</h2>
+      <div class="faq">
+        <details><summary>Can you guarantee my email reaches the inbox?</summary><p>No one honestly can. Inbox placement also depends on your sending reputation and content. What I can do is remove every technical reason mail gets rejected or flagged, and show you the evidence.</p></details>
+        <details><summary>Do you need access to my mailboxes?</summary><p>No. The audit uses public DNS records and test messages. I only need DNS access, or I give you the exact records to paste, and server access if the mail server itself needs changes.</p></details>
+        <details><summary>Which mail setups do you work with?</summary><p>Self-hosted Postfix and Dovecot servers, and domains sending through services such as Google Workspace, Microsoft 365 or a transactional relay.</p></details>
+        <details><summary>What does it cost?</summary><p>It depends on the number of domains and whether the mail server needs changes. Send me your domain and I will reply with a plan, a price and a date.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec contact">
+    <div class="wrap">
+      <p class="eyebrow">Next step</p>
+      <h2 class="huge">Send me<br>your domain<span>.</span></h2>
+      <p class="lede">I will reply with what I found, a plan, a price and a date.</p>
+      <!--email_off--><a class="btn btn-lg" href="mailto:emin@bilgen.dev?subject=Email%20deliverability%20audit">emin@bilgen.dev</a><!--/email_off-->
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap"><span>© 2026 Emin Bilgen · Ankara</span><span><a href="/">bilgen.dev</a> · <a href="https://status.bilgen.dev" rel="noopener">status</a></span></div></footer>
+<script>(function(){var n=document.getElementById("nav");function f(){n.classList.toggle("solid",scrollY>40)}addEventListener("scroll",f,{passive:true});f()})()</script>
+</body>
+</html>
